@@ -48,6 +48,7 @@ following:
 
  * CGAL 4.12
  * ruby (with the package `colorize`)
+ * gnuplot
  * pandoc
 
 ## Running the benchmark
