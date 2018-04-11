@@ -12,9 +12,11 @@ $date = `date +%Y-%m-%d_%Hh%Mm%Ss`.chop
 
 $mode = "full"
 
-if ARGV.size != 0
-  if ARGV[0] == "--small"
+ARGV.each do |a|
+  if a == "--small"
     $mode = "small"
+  else
+    $date = $date + "_" + a
   end
 end
 
@@ -22,8 +24,10 @@ puts "[CLASSIFICATION BENCHMARK] Using #{$mode} data sets\n".green.bold
 
 if $mode == "full"
   $mode = ""
+  $date = "full_" + $date
 else
   $mode = "--small"
+  $date = "small_" + $date
 end
 
 puts "[COMPILING PROGRAMS]".red.bold
