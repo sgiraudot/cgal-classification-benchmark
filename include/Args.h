@@ -52,7 +52,7 @@ public:
   float voxel_size() const { return m_voxel_size; }
   std::size_t nb_scales() const { return m_nb_scales; }
   
-  Args (int argc, char** argv)
+  Args (int argc, char** argv) : m_small_data_sets (false)
   {
     std::string configfile;
     for (int i = 1; i < argc; ++ i)
