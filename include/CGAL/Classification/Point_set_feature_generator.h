@@ -177,7 +177,7 @@ private:
     {
       CGAL::Real_timer t;
       t.start();
-      if (voxel_size < 0.)
+      if (lower_grid == NULL)
         neighborhood = new Neighborhood (input, point_map);
       else
         neighborhood = new Neighborhood (input, point_map, voxel_size);
@@ -192,7 +192,7 @@ private:
       t.start();
       
       eigen = new Local_eigen_analysis
-        (input, point_map, neighborhood->k_neighbor_query(6), ConcurrencyTag(), DiagonalizeTraits());
+        (input, point_map, neighborhood->k_neighbor_query(18), ConcurrencyTag(), DiagonalizeTraits());
       
       float range = eigen->mean_range();
       if (this->voxel_size < 0)
@@ -671,7 +671,7 @@ private:
     
     m_scales.reserve (nb_scales);
     
-    m_scales.push_back (new Scale (m_input, m_point_map, m_bbox, -1.f));
+    m_scales.push_back (new Scale (m_input, m_point_map, m_bbox, voxel_size));
 
     if (voxel_size == -1.f)
       voxel_size = m_scales[0]->grid_resolution();
