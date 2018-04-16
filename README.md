@@ -17,7 +17,7 @@ of output and of computation time.
 
 When trying to add a feature or to change something in the package, we
 just need to apply the same benchmark again and to compare the results
-to check if there is an improvment (or if, at least, there is no
+to check if there is an improvement (or if, at least, there is no
 regression).
 
 ## How it works
@@ -33,12 +33,13 @@ regression).
    points belonging to the trees a value of `1`, and building points a
    value of `2`).
  
- * The script generates some files in `log/[date]` where `[date]`
-   contains the date + hours of when the script is launched. Mainly,
-   it generates a web page `report.html` that can be seen in a web
-   browser. It shows the memory usage along time, the classifiction
-   performances for each label and the overall evaluation (accuracy,
-   intersection over union, etc.)
+ * The script generates some files in `log/[full/small]_[date]_[id]`
+   where `[date]` contains the date + hours of when the script is
+   launched and `[id]` is an optional user-specified
+   identifier. Mainly, it generates a web page `report.html` that can
+   be seen in a web browser. It shows the memory usage along time, the
+   classifiction performances for each label and the overall
+   evaluation (accuracy, intersection over union, etc.)
  
 ## Dependencies
 
@@ -56,5 +57,11 @@ following:
  1. Put your config files in `config/` and put the data sets where the
     config files say they are
  2. Run `ruby run.rb` or `ruby run.rb --small` to run the benchmark on
-    the small data sets
- 3. If all goes well, results are in `log/[date]/report.html`
+    the small data sets. You can run `ruby run.rb --small my_test` to
+    identify your tests with `my_test`.
+ 3. If all goes well, a detailed report is generated in
+    `log/[full/small]_[date]_[id]/report.html`
+
+For example, if I run `ruby run.rb new_feature` on the 13th of April
+in the morning, my log files will be saved in a directory such as
+`log/full_2018-04-13_11h08m32s_new_feature`.
