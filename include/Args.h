@@ -88,47 +88,33 @@ public:
     boost::tie (echo_map, echo_found)
       = points.template property_map<boost::uint8_t>("number_of_returns");
     
-    if (!m_use_colors && !m_use_echo)
-      m_generator = boost::make_shared<Feature_generator>
-        (features, points, points.point_map(), m_nb_scales,
-         CGAL::Default(), CGAL::Default(), CGAL::Default(), m_voxel_size);
-    else if (!m_use_colors && m_use_echo)
+    m_generator = boost::make_shared<Feature_generator>
+      (points, points.point_map(), m_nb_scales);
+
+#ifdef CGAL_LINKED_WITH_TBB
+    features.begin_parallel_additions();
+#endif
+  
+    m_generator->generate_point_based_features (features);
+
+    if (m_use_colors)
+    {
+      if (!color_map.found)
+      {
+        std::cerr << "Error: can't find colors" << std::endl;
+        exit(-1);
+      }
+      m_generator->generate_color_based_features (features, color_map);
+    }
+
+    if (m_use_echo)
     {
       if (!echo_found)
       {
         std::cerr << "Error: can't find echo" << std::endl;
         exit(-1);
       }
-      m_generator = boost::make_shared<Feature_generator>
-        (features, points, points.point_map(), m_nb_scales,
-         CGAL::Default(), CGAL::Default(), echo_map, m_voxel_size);
-    }
-    else if (m_use_colors && !m_use_echo)
-    { 
-      if (!color_map.found)
-      {
-        std::cerr << "Error: can't find colors" << std::endl;
-        exit(-1);
-      }
-      m_generator = boost::make_shared<Feature_generator>
-        (features, points, points.point_map(), m_nb_scales,
-         CGAL::Default(), color_map, CGAL::Default(), m_voxel_size);
-    }
-    else if (m_use_colors && m_use_echo)
-    { 
-      if (!echo_found)
-      {
-        std::cerr << "Error: can't find echo" << std::endl;
-        exit(-1);
-      }
-      if (!color_map.found)
-      {
-        std::cerr << "Error: can't find colors" << std::endl;
-        exit(-1);
-      }
-      m_generator = boost::make_shared<Feature_generator>
-        (features, points, points.point_map(), m_nb_scales,
-         CGAL::Default(), color_map, echo_map, m_voxel_size);
+      m_generator->generate_echo_based_features (features, echo_map);
     }
 
     if (m_use_intensity)
@@ -156,6 +142,11 @@ public:
                      <Point_set, Point_set::Property_map<short> > >
                      (points, signed_intensity, "intensity");
     }
+    
+#ifdef CGAL_LINKED_WITH_TBB
+    features.end_parallel_additions();
+#endif
+    
   }
 
 private:
