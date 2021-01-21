@@ -3,32 +3,44 @@
 
 #include <CGAL/Random.h>
 
+#include <boost/iterator/transform_iterator.hpp>
+
 #include "Types.h"
 
 class Filtered_range
 {
-  Point_set& points;
-  mutable CGAL::Random predicate;
+  typedef boost::transform_iterator<std::function<int(Point_set::Index)>, Point_set::const_iterator> iterator;
+
+  const Point_set& points;
   Point_set::Property_map<int> label;
+  std::vector<bool> is_training;
   bool training;
+  std::function<int(Point_set::Index)> transform;
 
 public:
 
   Filtered_range (Point_set& points, bool training)
-    : points (points), predicate (0), training (training)
+    : points(points), training (training)
   {
+    CGAL::Random predicate(0);
+    is_training.reserve(points.size());
+    for (std::size_t i = 0; i < points.size(); ++ i)
+      is_training.push_back (predicate.get_double() < 0.1);
+
     label = points.property_map<int> ("label").first;
+
+    transform = [&](const Point_set::Index& idx) -> int
+                {
+                  if (is_training[idx] == training)
+                    return label[idx];
+                  // else
+                  return -1;
+                };
   }
 
-  std::size_t size() const { return points.size(); }
+  iterator begin() const { return boost::make_transform_iterator (points.begin(), transform); }
+  iterator end() const { return boost::make_transform_iterator (points.end(), transform); }
 
-  int operator[] (const std::size_t& idx) const
-  {
-    bool t = (predicate.get_double() < 0.1);
-    if (training == t)
-      return label[idx];
-    return -1;
-  }
 };
 
 #endif // FILTERED_RANGE_H

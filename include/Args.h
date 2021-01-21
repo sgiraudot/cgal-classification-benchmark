@@ -25,7 +25,7 @@ class Args
     Point_set::Property_map<unsigned char> green_map;
     Point_set::Property_map<unsigned char> blue_map;
     bool found;
-    
+
     Color_map (Point_set& points)
     {
       boost::tie (red_map, found) = points.template property_map<unsigned char>("red");
@@ -33,25 +33,21 @@ class Args
       boost::tie (blue_map, found) = points.template property_map<unsigned char>("blue");
     }
 
-    friend CGAL::Classification::RGB_Color get (const Color_map& cm, const Point_set::Index& idx)
+    friend CGAL::Color get (const Color_map& cm, const Point_set::Index& idx)
     {
-      CGAL::Classification::RGB_Color out;
-      out[0] = cm.red_map[idx]; 
-      out[1] = cm.green_map[idx]; 
-      out[2] = cm.blue_map[idx];
-      return out;
+      return CGAL::Color (cm.red_map[idx], cm.green_map[idx], cm.blue_map[idx]);
     }
   };
 
 public:
-  
+
   const char* input_filename() const { return m_input_file.c_str(); }
   const char* memory_log_filename() const { return m_mem_logfile.c_str(); }
   std::size_t number_of_trees() const { return m_nb_trees; }
   std::size_t maximum_depth() const { return m_max_depth; }
   float voxel_size() const { return m_voxel_size; }
   std::size_t nb_scales() const { return m_nb_scales; }
-  
+
   Args (int argc, char** argv) : m_small_data_sets (false)
   {
     std::string configfile;
@@ -87,14 +83,14 @@ public:
     bool echo_found;
     boost::tie (echo_map, echo_found)
       = points.template property_map<boost::uint8_t>("number_of_returns");
-    
+
     m_generator = boost::make_shared<Feature_generator>
       (points, points.point_map(), m_nb_scales);
 
 #ifdef CGAL_LINKED_WITH_TBB
     features.begin_parallel_additions();
 #endif
-  
+
     m_generator->generate_point_based_features (features);
 
     if (m_use_colors)
@@ -123,7 +119,7 @@ public:
       Point_set::Property_map<short> signed_intensity;
       bool unsigned_okay = false;
       bool signed_okay = false;
-      
+
       boost::tie (unsigned_intensity, unsigned_okay)
         = points.property_map<unsigned short>("intensity");
       boost::tie (signed_intensity, signed_okay)
@@ -142,15 +138,15 @@ public:
                      <Point_set, Point_set::Property_map<short> > >
                      (points, signed_intensity, "intensity");
     }
-    
+
 #ifdef CGAL_LINKED_WITH_TBB
     features.end_parallel_additions();
 #endif
-    
+
   }
 
 private:
-  
+
   void init (std::ifstream& file)
   {
     std::string line;
@@ -159,21 +155,21 @@ private:
     std::size_t nb = 0;
 
     std::string id;
-    
+
     while(getline(file,line))
     {
       ++ nb;
-       
+
       iss.clear();
       iss.str(line);
       std::string tag;
-      char equal_sign;      
+      char equal_sign;
       if (!(iss >> tag >> equal_sign))
         continue;
-      
+
       if (tag[0] == '#') // Skip comments
         continue;
-      
+
       if (equal_sign != '=')
       {
         std::cerr << "Configuration error (line " << nb << "): expected \" = \" symbol" << std::endl;

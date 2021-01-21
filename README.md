@@ -32,7 +32,7 @@ regression).
    points belonging to the ground are assigned a `label` value of `0`,
    points belonging to the trees a value of `1`, and building points a
    value of `2`).
- 
+
  * The script generates some files in `log/[full/small]_[date]_[id]`
    where `[date]` contains the date + hours of when the script is
    launched and `[id]` is an optional user-specified
@@ -40,14 +40,14 @@ regression).
    be seen in a web browser. It shows the memory usage along time, the
    classifiction performances for each label and the overall
    evaluation (accuracy, intersection over union, etc.)
- 
+
 ## Dependencies
 
 The benchmark was created and only tested using GNU/Linux. It might
 work on other platforms, but I haven't tested. It depends on the
 following:
 
- * CGAL 4.12
+ * CGAL 5.2
  * ruby (with the package `colorize`)
  * gnuplot
  * pandoc
