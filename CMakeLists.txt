@@ -1,92 +1,41 @@
 # Created by the script cgal_create_CMakeLists
 # This is the CMake script for compiling a set of CGAL applications.
 
-project( classification_benchmark )
+project( cgal-classification-benchmark )
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.1)
 
 # CGAL and its components
-find_package( CGAL QUIET COMPONENTS  )
+find_package( CGAL REQUIRED )
 
 if ( NOT CGAL_FOUND )
   message(STATUS "This project requires the CGAL library, and will not be compiled.")
   return()  
 endif()
-
-# include helper file
 include( ${CGAL_USE_FILE} )
 
-
-# Boost and its components
 find_package( Boost REQUIRED )
-
 if ( NOT Boost_FOUND )
   message(STATUS "This project requires the Boost library, and will not be compiled.")
   return()  
 endif()
 
-find_package( Boost OPTIONAL_COMPONENTS serialization iostreams )
-
-if( WIN32 )
-# to avoid a warning with old cmake 
-  set(_Boost_BZIP2_HEADERS             "boost/iostreams/filter/bzip2.hpp")
-  set(_Boost_ZLIB_HEADERS              "boost/iostreams/filter/zlib.hpp")
-  find_package( Boost OPTIONAL_COMPONENTS zlib)
-endif()
-
-find_package(TBB QUIET)
-
-# include for local directory
-include_directories( BEFORE include )
-
-# include for local package
-include_directories( BEFORE ../../include )
-
-
-# Creating entries for all C++ files with "main" routine
-# ##########################################################
-
-include( CGAL_CreateSingleSourceCGALProgram )
-
-# Classification programs
-set(targets benchmark)
-  
-# Classification requires some C++11 features
-set(needed_cxx_features cxx_rvalue_references cxx_variadic_templates)
-
-# Libraries and flags
-set(classification_linked_libraries)
-set(classification_compile_definitions)
-
-
-if (Boost_SERIALIZATION_FOUND AND Boost_IOSTREAMS_FOUND)
-  set(classification_linked_libraries ${classification_linked_libraries}
-    ${Boost_SERIALIZATION_LIBRARY}
-    ${Boost_IOSTREAMS_LIBRARY})
-else()
-  message(STATUS "NOTICE: Boost Serialization or IO Streams not found, no example will be compiled.")
+find_package(Eigen3 3.1.0)
+include(CGAL_Eigen_support)
+if (NOT TARGET CGAL::Eigen_support)
+  message(STATUS "NOTICE: This project requires the Eigen library, and will not be compiled.")
   return()
 endif()
 
-if( WIN32 )
-  if (Boost_ZLIB_FOUND)
-    set(classification_linked_libraries ${classification_linked_libraries}
-      ${Boost_ZLIB_LIBRARY})
-  else()
-    message(STATUS "NOTICE: Boost ZLIB not found, no example will be compiled.")
-    return()
-  endif()
+find_package(TBB QUIET)
+include(CGAL_TBB_support)
+if(NOT TARGET CGAL::TBB_support)
+  message(STATUS "NOTICE: This project requires the TBB library, and will not be compiled.")
+  return()
 endif()
 
-# Creating targets with correct libraries and flags
-foreach(target ${targets})
-  create_single_source_cgal_program( "${target}.cpp" CXX_FEATURES ${needed_cxx_features} )
-  if(TARGET ${target})
-    target_link_libraries(${target} PUBLIC ${classification_linked_libraries})
-    target_compile_definitions(${target} PUBLIC ${classification_compile_definitions})
-    if(TBB_FOUND)
-      CGAL_target_use_TBB(${target})
-    endif()
-  endif()
-endforeach()
+include_directories( BEFORE include )
+
+add_executable(benchmark "benchmark.cpp")
+target_link_libraries(benchmark CGAL::CGAL CGAL::Eigen_support CGAL::TBB_support)
 
